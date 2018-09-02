@@ -15,10 +15,7 @@ trait Syntax[F[_], A] {
 trait ConfigSyntax[F[_], A] extends Syntax[F, A] {
   def read(key: PropertyKey)(implicit P: Property[A]): F[A]
 
-  def document(fa: F[A], docs: String): F[A] = {
-    println(docs)
-    fa
-  }
+  def document(fa: F[A], docs: String): F[A] = ???
 }
 
 object ConfigSyntax {
