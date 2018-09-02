@@ -20,9 +20,6 @@ package object config {
     def unapply[A, B](t: (A, B)): Option[(A, B)] = Some(t)
   }
 
-  type MapReader[A] = Map[String, String] => Either[ConfigError, A]
-  type MapWriter[A] = A => Either[ConfigError, Map[String, String]]
-
   final def read[F[_], A: Property](key: PropertyKey)(implicit F: ConfigSyntax[F, A]): F[A] =
     ConfigSyntax[F, A].read(key)
 }

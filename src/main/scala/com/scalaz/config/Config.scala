@@ -7,6 +7,9 @@ trait Config[A] {
 }
 
 object Config {
+  type MapReader[A] = Map[String, String] => Either[ConfigError, A]
+  type MapWriter[A] = A => Either[ConfigError, Map[String, String]]
+  
   def reader[A](config: Config[A]): MapReader[A] =
     config.apply(new ConfigSyntax[MapReader, A] {
       override def read(key: PropertyKey)(implicit P: Property[A]): MapReader[A] = ???
