@@ -14,7 +14,10 @@ publishTo in ThisBuild := {
 
 dynverSonatypeSnapshots in ThisBuild := true
 
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.26"
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % "7.2.26",
+  "org.scalaz" %% "scalaz-effect" % "7.2.26"
+)
 
 lazy val sonataCredentials = for {
   username <- sys.env.get("SONATYPE_USERNAME")
