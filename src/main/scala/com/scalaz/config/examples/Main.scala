@@ -1,7 +1,8 @@
 package com.scalaz.config
+
 package examples
 import com.scalaz.config.ConfigError.ErrorType
-import scalaz.{\/}
+import scalaz.{ \/ }
 import scalaz.syntax.equal._
 import scalaz.std.string._
 import scalaz.syntax.either._
@@ -18,7 +19,8 @@ object Main extends App {
     override def read(p: PropertyValue): ErrorType \/ EnvVar1 =
       if (p === "right") EnvVar1(p).right else ConfigError.InvalidValue(p, "right").left
 
-    override def document: String = "This is first property from the environment that can only be right."
+    override def document: String =
+      "This is first property from the environment that can only be right."
   }
 
   implicit val propertyEnvVar2: Property[EnvVar2] = new Property[EnvVar2] {
@@ -27,7 +29,8 @@ object Main extends App {
     override def read(p: PropertyValue): ErrorType \/ EnvVar2 =
       if (p === "right2") EnvVar2(p).right else ConfigError.InvalidValue(p, "right2").left
 
-    override def document: String = "This is first property from the environment that can only be right."
+    override def document: String =
+      "This is first property from the environment that can only be right."
   }
 
   import Config._

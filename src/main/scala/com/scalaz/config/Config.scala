@@ -1,6 +1,6 @@
 package com.scalaz.config
 
-import scalaz.{NonEmptyList, \/}
+import scalaz.{ NonEmptyList, \/ }
 
 trait Config[A] {
   def apply[F[_]](implicit F: ConfigSyntax[F, A]): F[A]

@@ -1,7 +1,7 @@
 package com.scalaz.config
 
 import com.scalaz.config.ConfigError.ErrorType
-import scalaz.{\/}
+import scalaz.{ \/ }
 
 trait Property[A] {
   def show(a: A): PropertyValue
