@@ -1,30 +1,23 @@
 package com.scalaz.config
 
-import scalaz.\/
+import scalaz.{NonEmptyList, \/}
 
 trait Config[A] {
   def apply[F[_]](implicit F: ConfigSyntax[F, A]): F[A]
 }
 
 object Config {
-  type MapReader[A] = Map[String, String] => Either[ConfigError, A]
-  type MapWriter[A] = A => Either[ConfigError, Map[String, String]]
+  type MapReader[A] = Map[String, String] => NonEmptyList[ConfigError] \/ A
+  type MapWriter[A] = A => Map[String, String]
 
-  def reader[A](config: Config[A]): MapReader[A] =
-    config.apply(new ConfigSyntax[MapReader, A] {
-      override def read(key: PropertyKey)(implicit P: Property[A]): MapReader[A]             = ???
-      override def point(a: => A): MapReader[A]                                              = ???
-      override def map[B](f: MapReader[A])(fa: A => B): MapReader[B]                         = ???
-      override def product[B](l: => MapReader[A], r: => MapReader[B]): MapReader[(A, B)]     = ???
-      override def coproduct[B](l: => MapReader[A], r: => MapReader[B]): MapReader[\/[A, B]] = ???
-    })
+  // ConfigSyntax should be derived if there is a ConfigSyntax available for each individual fields in  A.
+  def reader[A](config: Config[A])(implicit F: ConfigSyntax[MapReader, A]): MapReader[A] =
+    config.apply
 
-  def writer[A](config: Config[A]): MapWriter[A] =
-    config.apply(new ConfigSyntax[MapWriter, A] {
-      override def read(key: PropertyKey)(implicit P: Property[A]): MapWriter[A]             = ???
-      override def point(a: => A): MapWriter[A]                                              = ???
-      override def map[B](f: MapWriter[A])(fa: A => B): MapWriter[B]                         = ???
-      override def product[B](l: => MapWriter[A], r: => MapWriter[B]): MapWriter[(A, B)]     = ???
-      override def coproduct[B](l: => MapWriter[A], r: => MapWriter[B]): MapWriter[\/[A, B]] = ???
-    })
+  // ConfigSyntax should be derived if there is a ConfigSyntax available for each individual fields in A for a Mapwriter.
+  def writer[A](config: Config[A])(implicit F: ConfigSyntax[MapWriter, A]): MapWriter[A] =
+    config.apply
+
+  final def read[A](key: PropertyKey)(implicit C: Property[A]): MapReader[A] =
+    ConfigSyntax[MapReader, A].read(key)
 }
