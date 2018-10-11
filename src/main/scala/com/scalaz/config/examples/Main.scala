@@ -2,7 +2,7 @@ package com.scalaz.config
 
 package examples
 import com.scalaz.config.ConfigError.ErrorType
-import scalaz.{-\/, NonEmptyList, \/, \/-}
+import scalaz.{ -\/, NonEmptyList, \/, \/- }
 import scalaz.syntax.equal._
 import scalaz.std.string._
 import scalaz.syntax.either._
@@ -40,20 +40,22 @@ object Main extends App {
     read[EnvVar1](key = "envvar") ~
       read[EnvVar2](key = "envvar2")
 
-
   //  User will be already be in the context of IO (ZIO potentially)
   val configParsing = IO.apply(sys.env).map(mapReader(_))
-
 
   // If config doesn't exist in env
   // Immediate issue is max error accumulation didn't take place
   val parsed = configParsing.unsafePerformIO()
-  assert(parsed == -\/(NonEmptyList(ConfigError("envvar", ConfigError.MissingValue))) )
+  assert(parsed == -\/(NonEmptyList(ConfigError("envvar", ConfigError.MissingValue))))
 
   // If config exists in the env, and they are valid
   val validConfig = Map("envvar" -> "right", "envvar2" -> "right2")
-  assert(mapReader(validConfig) == \/-((EnvVar1("right"),EnvVar2("right2"))))
+  assert(mapReader(validConfig) == \/-((EnvVar1("right"), EnvVar2("right2"))))
 
   val invalidConfig = Map("envvar" -> "wrong")
-  assert(mapReader(invalidConfig) == -\/(NonEmptyList(ConfigError("envvar", ConfigError.InvalidValue("wrong", "right"))) ))
+  assert(
+    mapReader(invalidConfig) == -\/(
+      NonEmptyList(ConfigError("envvar", ConfigError.InvalidValue("wrong", "right")))
+    )
+  )
 }
