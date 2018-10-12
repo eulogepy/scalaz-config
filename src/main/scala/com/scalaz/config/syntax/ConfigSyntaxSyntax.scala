@@ -1,4 +1,5 @@
 package com.scalaz.config
+
 package syntax
 
 trait ConfigSyntaxSyntax {

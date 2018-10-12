@@ -1,8 +1,9 @@
 package com.scalaz.config
 
 package examples
+
 import com.scalaz.config.ConfigError.ErrorType
-import scalaz.{-\/, NonEmptyList, \/, \/-}
+import scalaz.{ -\/, NonEmptyList, \/, \/- }
 import scalaz.syntax.equal._
 import scalaz.std.string._
 import scalaz.effect.IO
@@ -37,6 +38,7 @@ object Main extends App {
   import Config._
 
   def config[F[_]] = new Config[F, SampleConfig] {
+
     val equiv: Equiv[(EnvVar1, EnvVar2), SampleConfig] = Equiv[EnvVar1 ~ EnvVar2, SampleConfig](
       a => SampleConfig(a._1, a._2),
       s => s.s1 -> s.s2
