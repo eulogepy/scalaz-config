@@ -1,15 +1,15 @@
-package com.scalaz.config.syntax
-
-import com.scalaz.config.ConfigSyntax
+package com.scalaz.config
+package syntax
 
 trait ConfigSyntaxSyntax {
   implicit class ConfigSyntaxSyntaxOps[F[_], A](self: F[A]) {
-    final def map[B](f: A => B)(implicit F: ConfigSyntax[F, A]): F[B] = F.map(self)(f)
+    final def map[B](f: Equiv[A, B])(implicit F: ConfigSyntax[F]): F[B] =
+      F.map(self)(f)
 
-    final def ~ [B](that: F[B])(implicit F: ConfigSyntax[F, A]): F[(A, B)] =
+    final def ~ [B](that: F[B])(implicit F: ConfigSyntax[F]): F[(A, B)] =
       F.product(self, that)
 
-    final def `<?>` (docs: String)(implicit F: ConfigSyntax[F, A]): F[A] =
+    final def `<?>` (docs: String)(implicit F: ConfigSyntax[F]): F[A] =
       F.document(self, docs)
   }
 }
