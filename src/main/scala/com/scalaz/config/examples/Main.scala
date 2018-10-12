@@ -5,8 +5,8 @@ import com.scalaz.config.ConfigError.ErrorType
 import scalaz.{ -\/, NonEmptyList, \/, \/- }
 import scalaz.syntax.equal._
 import scalaz.std.string._
-import scalaz.syntax.either._
 import scalaz.effect.IO
+import scalaz.syntax.std.boolean._
 
 object Main extends App {
   final case class EnvVar1(s: String) extends AnyVal
@@ -18,7 +18,7 @@ object Main extends App {
     override def show(a: EnvVar1): PropertyValue = a.s
 
     override def read(p: PropertyValue): ErrorType \/ EnvVar1 =
-      if (p === "right") EnvVar1(p).right else ConfigError.InvalidValue(p, "right").left
+      (p === "right").either(EnvVar1(p)).or(ConfigError.InvalidValue(p, "right"))
 
     override def document: String =
       "This is first property from the environment that can only be right."
@@ -28,10 +28,10 @@ object Main extends App {
     override def show(a: EnvVar2): PropertyValue = a.s
 
     override def read(p: PropertyValue): ErrorType \/ EnvVar2 =
-      if (p === "right2") EnvVar2(p).right else ConfigError.InvalidValue(p, "right2").left
+      (p === "right2").either(EnvVar2(p)).or(ConfigError.InvalidValue(p, "right2"))
 
     override def document: String =
-      "This is first property from the environment that can only be right."
+      "This is second property from the environment that can only be right."
   }
 
   import Config._

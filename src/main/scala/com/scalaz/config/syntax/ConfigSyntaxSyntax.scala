@@ -1,6 +1,6 @@
 package com.scalaz.config.syntax
 
-import com.scalaz.config.{ ConfigSyntax }
+import com.scalaz.config.ConfigSyntax
 
 trait ConfigSyntaxSyntax {
   implicit class ConfigSyntaxSyntaxOps[F[_], A](self: F[A]) {

@@ -1,13 +1,14 @@
 package com.scalaz.config
 
-import scalaz.{ NonEmptyList, \/ }
+import scalaz.{ Kleisli, NonEmptyList, \/ }
 
 trait Config[A] {
   def apply[F[_]](implicit F: ConfigSyntax[F, A]): F[A]
 }
 
 object Config {
-  type MapReader[A] = Map[String, String] => NonEmptyList[ConfigError] \/ A
+  type Env          = Map[String, String]
+  type MapReader[A] = Kleisli[NonEmptyList[ConfigError] \/ ?, Env, A]
   type MapWriter[A] = A => Map[String, String]
 
   // ConfigSyntax should be derived if there is a ConfigSyntax available for each individual fields in  A.
