@@ -1,6 +1,6 @@
 package com.scalaz.config
 
-import com.scalaz.config.Config.{ Env, MapReader }
+import com.scalaz.config.Config.{ MapReader }
 import scalaz.syntax.either._
 import scalaz.syntax.nel._
 import scalaz.{ -\/, Kleisli, NonEmptyList, \/, \/- }
@@ -23,7 +23,7 @@ object ConfigSyntax {
   implicit def configSyntaxReader: ConfigSyntax[Config.MapReader] =
     new ConfigSyntax[Config.MapReader] {
       override def read[A](key: PropertyKey)(implicit P: Property[A]): MapReader[A] =
-        Kleisli[NonEmptyList[ConfigError] \/ ?, Env, A](
+        Kleisli(
           _.get(key)
             .fold(ConfigError(key, ConfigError.MissingValue).wrapNel.left[A])(
               P.read(_).leftMap(t => ConfigError(key, t).wrapNel)
@@ -31,7 +31,7 @@ object ConfigSyntax {
         )
 
       override def point[A](a: => A): MapReader[A] =
-        Kleisli[NonEmptyList[ConfigError] \/ ?, Env, A](_ => a.right)
+        Kleisli(_ => a.right)
 
       override def map[A, B](f: MapReader[A])(fa: Equiv[A, B]): MapReader[B] =
         f.map(fa.to)
@@ -40,7 +40,7 @@ object ConfigSyntax {
         l.flatMap(ll => r.map(rr => (ll, rr)))
 
       override def coproduct[A, B](l: => MapReader[A], r: => MapReader[B]): MapReader[A \/ B] =
-        Kleisli[NonEmptyList[ConfigError] \/ ?, Env, A \/ B](
+        Kleisli(
           env =>
             l.run(env) match {
               case -\/(e) => r.mapK(_.bimap(e.append, _.right[A])).run(env)
