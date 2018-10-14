@@ -11,4 +11,15 @@ trait Property[A] {
 
 object Property {
   def apply[A](implicit ev: Property[A]): Property[A] = ev
+
+  def instance[A](
+    f: A => PropertyValue,
+    g: PropertyValue => ErrorType \/ A,
+    doc: String
+  ): Property[A] =
+    new Property[A] {
+      override def show(a: A): PropertyValue              = f(a)
+      override def read(p: PropertyValue): ErrorType \/ A = g(p)
+      override def document: String                       = doc
+    }
 }
