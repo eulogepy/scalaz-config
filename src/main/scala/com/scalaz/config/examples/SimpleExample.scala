@@ -2,7 +2,8 @@ package com.scalaz.config
 
 package examples
 
-import scalaz.{ -\/, NonEmptyList, \/- }
+import com.scalaz.config.Config.MapReader
+import scalaz.{-\/, NonEmptyList, \/-}
 import scalaz.syntax.equal._
 import scalaz.std.string._
 import scalaz.effect.IO
@@ -27,8 +28,6 @@ object SimpleExample extends App {
       p => (p === "right2").either(EnvVar2(p)).or(ConfigError.InvalidValue(p, "right2")),
       "This is second property from the environment that can only be right."
     )
-
-  import Config._
 
   def config[F[_]] = new Config[F, SampleConfig] {
 

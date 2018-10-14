@@ -2,6 +2,7 @@ package com.scalaz.config
 
 package examples
 
+import com.scalaz.config.Config.MapReader
 import com.scalaz.config.ConfigError.MissingValue
 import scalaz.effect.IO
 import scalaz.std.string._
@@ -39,8 +40,6 @@ object CoproductExample extends App {
       p => (p === "right3").either(EnvVar3(p)).or(ConfigError.InvalidValue(p, "right2")),
       "This is second property from the environment that can only be right."
     )
-
-  import com.scalaz.config.Config._
 
   def config[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
 
