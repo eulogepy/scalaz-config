@@ -15,8 +15,11 @@ object CoproductExample extends App {
   final case class EnvVar2(s: String) extends AnyVal
   final case class EnvVar3(s: String) extends AnyVal
 
+  // EnvVar1 \/ EnvVar2 could be a simple ADT.
+  // In that case, explicit instance for EnvVar1 and EnvVar2 is wrong.
   case class SampleConfig(s1: EnvVar1 \/ EnvVar2, s2: EnvVar3)
 
+  // Having a property instance for
   implicit val propertyEnvVar1: Property[EnvVar1] =
     Property.instance(
       _.s,
@@ -49,7 +52,7 @@ object CoproductExample extends App {
       )
 
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
-      ((read[F, EnvVar1]("envvar").or(read[F, EnvVar2]("envvar2"))) ~
+      (read[F, EnvVar1]("envvar").or(read[F, EnvVar2]("envvar2")) ~
         read[F, EnvVar3]("envvar3")).map(equiv)
   }
 
