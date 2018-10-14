@@ -32,7 +32,7 @@ object SimpleExample extends App {
 
   def config[F[_]] = new Config[F, SampleConfig] {
 
-    val equiv: Equiv[(EnvVar1, EnvVar2), SampleConfig] = Equiv[EnvVar1 ~ EnvVar2, SampleConfig](
+    val equiv = Equiv[EnvVar1 ~ EnvVar2, SampleConfig](
       a => SampleConfig(a._1, a._2),
       s => s.s1 -> s.s2
     )

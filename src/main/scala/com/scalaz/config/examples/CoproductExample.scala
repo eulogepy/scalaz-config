@@ -8,7 +8,7 @@ import scalaz.std.string._
 import scalaz.syntax.either._
 import scalaz.syntax.equal._
 import scalaz.syntax.std.boolean._
-import scalaz.{ -\/, NonEmptyList, \/, \/- }
+import scalaz.{-\/, NonEmptyList, \/, \/-}
 
 object CoproductExample extends App {
   final case class EnvVar1(s: String) extends AnyVal
@@ -44,11 +44,10 @@ object CoproductExample extends App {
 
   def config[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
 
-    val equiv: Equiv[(EnvVar1 \/ EnvVar2, EnvVar3), SampleConfig] =
-      Equiv[EnvVar1 \/ EnvVar2 ~ EnvVar3, SampleConfig](
-        a => SampleConfig(a._1, a._2),
-        s => s.s1 -> s.s2
-      )
+    val equiv = Equiv[EnvVar1 \/ EnvVar2 ~ EnvVar3, SampleConfig](
+      a => SampleConfig(a._1, a._2),
+      s => s.s1 -> s.s2
+    )
 
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
       (read[F, EnvVar1]("envvar").or(read[F, EnvVar2]("envvar2")) ~
