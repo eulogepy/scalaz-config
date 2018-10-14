@@ -19,7 +19,6 @@ object CoproductExample extends App {
   // In that case, explicit instance for EnvVar1 and EnvVar2 is wrong.
   case class SampleConfig(s1: EnvVar1 \/ EnvVar2, s2: EnvVar3)
 
-  // Having a property instance for
   implicit val propertyEnvVar1: Property[EnvVar1] =
     Property.instance(
       _.s,
