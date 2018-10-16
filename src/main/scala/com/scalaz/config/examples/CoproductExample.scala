@@ -9,7 +9,7 @@ import scalaz.std.string._
 import scalaz.syntax.either._
 import scalaz.syntax.equal._
 import scalaz.syntax.std.boolean._
-import scalaz.{-\/, NonEmptyList, \/, \/-}
+import scalaz.{ -\/, NonEmptyList, \/, \/- }
 
 object CoproductExample extends App {
   final case class EnvVar1(s: String) extends AnyVal

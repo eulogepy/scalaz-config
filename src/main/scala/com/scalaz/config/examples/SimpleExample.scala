@@ -3,7 +3,7 @@ package com.scalaz.config
 package examples
 
 import com.scalaz.config.Config.MapReader
-import scalaz.{-\/, NonEmptyList, \/-}
+import scalaz.{ -\/, NonEmptyList, \/- }
 import scalaz.syntax.equal._
 import scalaz.std.string._
 import scalaz.effect.IO
