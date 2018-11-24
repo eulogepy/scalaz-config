@@ -22,9 +22,8 @@ object CoproductExample extends App {
 
 
   def anotherConfig[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
-    val equiv = Equiv[String ~ Int ~ Double, AnotherConfig]({
-      case ((a, b), c) => AnotherConfig(a, b, c)
-    },
+    val equiv = Equiv[String ~ Int ~ Double, AnotherConfig](
+      { case ((a, b), c) => AnotherConfig(a, b, c) },
       s => ((s.v1, s.v2), s.v3)
     )
 
@@ -34,8 +33,8 @@ object CoproductExample extends App {
 
   val mapReader: MapReader[SampleConfig \/ AnotherConfig] =
     sampleConfig[MapReader].apply.or(anotherConfig[MapReader].apply)
-  
-  // If config exists in the env, and they are valid
+
+  // Only variables for left config exists in Env (Ex: use connector1)
   val validConfigForSampleConfig = Map("envvar1" -> "v1", "envvar2" -> "v2", "envvar3" -> "v3")
 
   assert(
@@ -43,6 +42,7 @@ object CoproductExample extends App {
     mapReader(validConfigForSampleConfig) ==  \/-(-\/(SampleConfig("v1", "v2")))
   )
 
+  // Only variables for left config exists in Env (Ex: use connector2 in the absence of connector1)
   val validConfigForAnotherConfig = Map("envvar2" -> "v2", "envvar3" -> "v3", "envvar4" -> "1", "envvar5" -> "2.0")
 
   assert(
