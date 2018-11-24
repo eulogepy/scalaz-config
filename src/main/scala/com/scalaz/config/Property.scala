@@ -1,12 +1,12 @@
 package com.scalaz.config
 
-import com.scalaz.config.ConfigError.ErrorType
-import scalaz.{ \/ }
+import com.scalaz.config.ConfigError.{ErrorType, ParseError}
+import scalaz.\/
+import scalaz.syntax.either._
 
 trait Property[A] {
   def show(a: A): PropertyValue
   def read(p: PropertyValue): ErrorType \/ A
-  def document: String
 }
 
 object Property {
@@ -15,11 +15,18 @@ object Property {
   def instance[A](
     f: A => PropertyValue,
     g: PropertyValue => ErrorType \/ A,
-    doc: String
   ): Property[A] =
     new Property[A] {
       override def show(a: A): PropertyValue              = f(a)
       override def read(p: PropertyValue): ErrorType \/ A = g(p)
-      override def document: String                       = doc
     }
+
+  implicit val intProperty: Property[Int] =
+    instance(_.toString, a => \/.fromTryCatchNonFatal(a.toInt).leftMap(t => ParseError(a, "int")))
+
+  implicit val longProperty: Property[Long] =
+    instance(_.toString, a => \/.fromTryCatchNonFatal(a.toLong).leftMap(t => ParseError(a, "long")))
+
+  implicit val doubleProperty: Property[String] =
+    instance(_.toString, _.right)
 }
