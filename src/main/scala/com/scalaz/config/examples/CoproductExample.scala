@@ -38,7 +38,7 @@ object CoproductExample extends App {
   val validConfigForSampleConfig = Map("envvar1" -> "v1", "envvar2" -> "v2", "envvar3" -> "v3")
 
   assert(
-    // Either a coproduct of right or a left of nonemptylist of errors.
+    // A right of coproduct or a left of nonemptylist of errors.
     mapReader(validConfigForSampleConfig) ==  \/-(-\/(SampleConfig("v1", "v2")))
   )
 
@@ -46,7 +46,7 @@ object CoproductExample extends App {
   val validConfigForAnotherConfig = Map("envvar2" -> "v2", "envvar3" -> "v3", "envvar4" -> "1", "envvar5" -> "2.0")
 
   assert(
-    // Either a coproduct of right or a left of nonemptylist of errors.
+    // A right of coproduct or a left of nonemptylist of errors.
     mapReader(validConfigForAnotherConfig) == \/-(\/-(AnotherConfig("v3", 1, 2.0)))
   )
 
