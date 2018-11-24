@@ -32,10 +32,15 @@ object CoproductExample extends App {
   }
 
   val mapReader: MapReader[SampleConfig \/ AnotherConfig] =
-    sampleConfig[MapReader].apply.or(anotherConfig[MapReader].apply)
+    sampleConfig[MapReader].apply or anotherConfig[MapReader].apply
 
   // Only variables for left config exists in Env (Ex: use connector1)
-  val validConfigForSampleConfig = Map("envvar1" -> "v1", "envvar2" -> "v2", "envvar3" -> "v3")
+  val validConfigForSampleConfig =
+    Map(
+      "envvar1" -> "v1",
+      "envvar2" -> "v2",
+      "envvar3" -> "v3"
+    )
 
   assert(
     // A right of coproduct or a left of nonemptylist of errors.
@@ -43,16 +48,26 @@ object CoproductExample extends App {
   )
 
   // Only variables for left config exists in Env (Ex: use connector2 in the absence of connector1)
-  val validConfigForAnotherConfig = Map("envvar2" -> "v2", "envvar3" -> "v3", "envvar4" -> "1", "envvar5" -> "2.0")
+  val validConfigForAnotherConfig =
+    Map(
+      "envvar2" -> "v2",
+      "envvar3" -> "v3",
+      "envvar4" -> "1",
+      "envvar5" -> "2.0"
+    )
 
   assert(
     // A right of coproduct or a left of nonemptylist of errors.
     mapReader(validConfigForAnotherConfig) == \/-(\/-(AnotherConfig("v3", 1, 2.0)))
   )
 
-  val invalidConfig = Map("envvar2" -> "v2", "envvar3" -> "v3", "envvar4" -> "1", "envvar5" -> "notadouble")
-
-  println(mapReader(invalidConfig))
+  val invalidConfig =
+    Map(
+      "envvar2" -> "v2",
+      "envvar3" -> "v3",
+      "envvar4" -> "1",
+      "envvar5" -> "notadouble"
+    )
 
   assert(
     mapReader(invalidConfig) == -\/(

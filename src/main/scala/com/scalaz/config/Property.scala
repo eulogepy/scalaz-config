@@ -35,14 +35,15 @@ object Property extends  PropertyInstances {
     instance(_.toString, _.right)
 
   implicit def taggedProperty[A, B](implicit ev: Property[A]): Property[A @@ B] =
-    ev.xmap(Tag[A, B].apply, Tag.unwrap)
+    ev.xmap[A @@ B](Tag[A, B], b => Tag.unwrap(b))
 }
 
 trait PropertyInstances {
-  implicit object propertyInstances extends InvariantFunctor[Property] {
-    override def xmap[A, B](ma: Property[A], f: A => B, g: B => A): Property[B] = new Property[B] {
-      override def show(a: B): String = ma.show(g(a))
-      override def read(p: String): ErrorType \/ B = ma.read(p).map(f)
+  implicit val invariantProperty: InvariantFunctor[Property] =
+    new InvariantFunctor[Property] {
+      override def xmap[A, B](ma: Property[A], f: A => B, g: B => A): Property[B] = new Property[B] {
+        override def show(a: B): String = ma.show(g(a))
+        override def read(p: String): ErrorType \/ B = ma.read(p).map(f)
+      }
     }
-  }
 }
