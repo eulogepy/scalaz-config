@@ -9,8 +9,7 @@ object CoproductExample extends App {
   case class SampleConfig(v1: String, v2: String)
   case class AnotherConfig(v1: String, v2: Int, v3: Double)
 
-  def config1[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
-
+  def sampleConfig[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
     val equiv = Equiv[String ~ String, SampleConfig](
       a => SampleConfig(a._1, a._2),
       s => s.v1 -> s.v2
@@ -22,7 +21,7 @@ object CoproductExample extends App {
   }
 
 
-  def config2[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
+  def anotherConfig[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
     val equiv = Equiv[String ~ Int ~ Double, AnotherConfig]({
       case ((a, b), c) => AnotherConfig(a, b, c)
     },
@@ -34,9 +33,8 @@ object CoproductExample extends App {
   }
 
   val mapReader: MapReader[SampleConfig \/ AnotherConfig] =
-    config1[MapReader].apply.or(config2[MapReader].apply)
-
-
+    sampleConfig[MapReader].apply.or(anotherConfig[MapReader].apply)
+  
   // If config exists in the env, and they are valid
   val validConfigForSampleConfig = Map("envvar1" -> "v1", "envvar2" -> "v2", "envvar3" -> "v3")
 
