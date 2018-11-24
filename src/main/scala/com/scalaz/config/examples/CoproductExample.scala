@@ -1,62 +1,68 @@
 package com.scalaz.config
-
 package examples
 
 import com.scalaz.config.Config.MapReader
-import com.scalaz.config.ConfigError.MissingValue
-import scalaz.effect.IO
-import scalaz.syntax.either._
 import scalaz.{-\/, NonEmptyList, \/, \/-}
 
 object CoproductExample extends App {
 
+  case class SampleConfig(v1: String, v2: String)
+  case class AnotherConfig(v1: String, v2: Int, v3: Double)
 
-  final case class EnvVar1(s: String) extends AnyVal
-  final case class EnvVar2(s: String) extends AnyVal
-  final case class EnvVar3(s: String) extends AnyVal
+  def config1[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
 
-  // EnvVar1 \/ EnvVar2 could be a simple ADT.
-  // In that case, explicit instance for EnvVar1 and EnvVar2 is wrong.
-  case class SampleConfig(s1: String \/ Int, s2: String)
-
-  def config[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
-
-    val equiv = Equiv[String \/ Int ~ String, SampleConfig](
+    val equiv = Equiv[String ~ String, SampleConfig](
       a => SampleConfig(a._1, a._2),
-      s => s.s1 -> s.s2
+      s => s.v1 -> s.v2
     )
 
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
-      (read[F, String]("envvar").or(read[F, Int]("envvar2")) ~
-        read[F, String]("envvar3")).map(equiv)
+      (read[F, String]("envvar1") ~
+        read[F, String]("envvar2")).map(equiv)
   }
 
-  val mapReader: MapReader[SampleConfig] = Config.reader(config)
 
-  //  User will be already be in the context of IO (ZIO potentially)
-  val configParsing = IO.apply(sys.env).map(mapReader(_))
-
-  // If config doesn't exist in env
-  // Immediate issue is max error accumulation didn't take place.
-  val parsed = configParsing.unsafePerformIO()
-  assert(
-    parsed == -\/(
-      NonEmptyList(
-        ConfigError("envvar", ConfigError.MissingValue),
-        ConfigError("envvar2", MissingValue)
-      )
+  def config2[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
+    val equiv = Equiv[String ~ Int ~ Double, AnotherConfig]({
+      case ((a, b), c) => AnotherConfig(a, b, c)
+    },
+      s => ((s.v1, s.v2), s.v3)
     )
-  )
+
+    override def apply(implicit F: ConfigSyntax[F]): F[AnotherConfig] =
+      (read[F, String]("envvar3") ~ read[F, Int]("envvar4") ~ read[F, Double]("envvar5")).map(equiv)
+  }
+
+  val mapReader: MapReader[SampleConfig \/ AnotherConfig] =
+    config1[MapReader].apply.or(config2[MapReader].apply)
+
 
   // If config exists in the env, and they are valid
-  val validConfig = Map("envvar" -> "right", "envvar2" -> "right2", "envvar3" -> "right3")
+  val validConfigForSampleConfig = Map("envvar1" -> "v1", "envvar2" -> "v2", "envvar3" -> "v3")
+
   assert(
-    mapReader(validConfig) == \/-(SampleConfig("right".left[Int],  "right3"))
+    // Either a coproduct of right or a left of nonemptylist of errors.
+    mapReader(validConfigForSampleConfig) ==  \/-(-\/(SampleConfig("v1", "v2")))
   )
 
-  val anotherConfig = Map("envvar2" -> "2", "envvar3" -> "right3")
+  val validConfigForAnotherConfig = Map("envvar2" -> "v2", "envvar3" -> "v3", "envvar4" -> "1", "envvar5" -> "2.0")
+
   assert(
-    mapReader(anotherConfig) ==
-      \/-(SampleConfig(2.right[String],  "right3"))
+    // Either a coproduct of right or a left of nonemptylist of errors.
+    mapReader(validConfigForAnotherConfig) == \/-(\/-(AnotherConfig("v3", 1, 2.0)))
+  )
+
+  val invalidConfig = Map("envvar2" -> "v2", "envvar3" -> "v3", "envvar4" -> "1", "envvar5" -> "notadouble")
+
+  println(mapReader(invalidConfig))
+
+  assert(
+    mapReader(invalidConfig) == -\/(
+      NonEmptyList(
+        ConfigError("envvar1", ConfigError.MissingValue),
+        ConfigError("envvar5", ConfigError.ParseError("notadouble", "double")
+        )
+      )
+    )
   )
 }

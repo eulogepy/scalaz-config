@@ -27,6 +27,9 @@ object Property {
   implicit val longProperty: Property[Long] =
     instance(_.toString, a => \/.fromTryCatchNonFatal(a.toLong).leftMap(t => ParseError(a, "long")))
 
-  implicit val doubleProperty: Property[String] =
+  implicit val doubleProperty: Property[Double] =
+    instance(_.toString, a => \/.fromTryCatchNonFatal(a.toDouble).leftMap(t => ParseError(a, "double")))
+
+  implicit val stringProperty: Property[String] =
     instance(_.toString, _.right)
 }
