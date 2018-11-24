@@ -63,4 +63,19 @@ object CoproductExample extends App {
       )
     )
   )
+
+  // Pick the left config (priority)
+  val allConfigsExist =
+    Map(
+      "envvar1" -> "v1",
+      "envvar2" -> "v2",
+      "envvar3" -> "v3",
+      "envvar4" -> "1",
+      "envvar5" -> "2.0"
+    )
+
+  assert(
+    mapReader(invalidConfig) ==
+      \/-(-\/(SampleConfig("v1", "v2")))
+  )
 }
