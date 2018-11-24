@@ -12,7 +12,7 @@ trait ConfigSyntaxSyntax {
     final def ~ [B](that: F[B])(implicit F: ConfigSyntax[F]): F[(A, B)] =
       F.product(self, that)
 
-    final def or[B](that: F[B])(implicit F: ConfigSyntax[F]): F[(A \/ B)] =
+    final def or[B](that: F[B])(implicit F: ConfigSyntax[F]): F[A \/ B] =
       F.coproduct(self, that)
 
     final def `<?>` (docs: String)(implicit F: ConfigSyntax[F]): F[A] =

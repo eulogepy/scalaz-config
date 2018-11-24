@@ -13,7 +13,7 @@ trait Syntax[F[_]] {
 }
 
 trait ConfigSyntax[F[_]] extends Syntax[F] {
-  def read[A](key: PropertyKey)(implicit P: Property[A]): F[A]
+  def read[A](key: String)(implicit P: Property[A]): F[A]
   def document[A](fa: F[A], docs: String): F[A] = ???
 }
 
@@ -22,7 +22,7 @@ object ConfigSyntax {
 
   implicit def configSyntaxReader: ConfigSyntax[Config.MapReader] =
     new ConfigSyntax[Config.MapReader] {
-      override def read[A](key: PropertyKey)(implicit P: Property[A]): MapReader[A] =
+      override def read[A](key: String)(implicit P: Property[A]): MapReader[A] =
         Kleisli(
           _.get(key)
             .fold(ConfigError(key, ConfigError.MissingValue).wrapNel.left[A])(

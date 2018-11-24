@@ -4,7 +4,7 @@ import com.scalaz.config.ConfigError.ErrorType
 import scalaz.Show
 import scalaz.syntax.show._
 
-final case class ConfigError(key: PropertyKey, value: ErrorType)
+final case class ConfigError(key: String, value: ErrorType)
 
 object ConfigError {
   sealed trait ErrorType
