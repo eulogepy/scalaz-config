@@ -27,6 +27,7 @@ object CoproductExample extends App {
       }
   }
 
+  // or you can do Config.reader(firstConfig).or(Config.reader(secondConfig))
   def finalReader[F[_]: ConfigSyntax]: F[SampleConfig \/ AnotherConfig] =
     firstConfig[F].apply.or(secondConfig[F].apply)
 
