@@ -4,7 +4,7 @@ import com.scalaz.config.ConfigError.ErrorType
 import scalaz.Show
 import scalaz.syntax.show._
 
-final case class ConfigError(key: String, value: ErrorType)
+final case class ConfigError(key: String, error: ErrorType)
 
 object ConfigError {
   sealed trait ErrorType
@@ -20,6 +20,6 @@ object ConfigError {
   })
 
   implicit val showConfigError: Show[ConfigError] = Show.shows[ConfigError](a =>
-    s"Error reading configuration. ${a.key}. Cause: ${a.value.shows}"
+    s"Error reading configuration. ${a.key}. Cause: ${a.error.shows}"
   )
 }

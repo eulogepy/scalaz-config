@@ -2,7 +2,9 @@ package com.scalaz.config
 package examples
 
 import com.scalaz.config.Config.MapReader
-import scalaz.{-\/, NonEmptyList, \/, \/-}
+import scalaz.{-\/, Failure, NonEmptyList, Success, \/, \/-}
+import scalaz.syntax.monad._
+import MapReader._
 
 object CoproductExample extends App {
 
@@ -10,25 +12,19 @@ object CoproductExample extends App {
   case class AnotherConfig(v1: String, v2: Int, v3: Double)
 
   def sampleConfig[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
-    val equiv = Equiv[String ~ String, SampleConfig](
-      a => SampleConfig(a._1, a._2),
-      s => s.v1 -> s.v2
-    )
-
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
-      (read[F, String]("envvar1") ~
-        read[F, String]("envvar2")).map(equiv)
+      (read[F, String]("envvar1") |@|
+        read[F, String]("envvar2")) {
+        SampleConfig
+      }
   }
 
 
   def anotherConfig[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
-    val equiv = Equiv[String ~ Int ~ Double, AnotherConfig](
-      { case ((a, b), c) => AnotherConfig(a, b, c) },
-      s => ((s.v1, s.v2), s.v3)
-    )
-
     override def apply(implicit F: ConfigSyntax[F]): F[AnotherConfig] =
-      (read[F, String]("envvar3") ~ read[F, Int]("envvar4") ~ read[F, Double]("envvar5")).map(equiv)
+      (read[F, String]("envvar3") |@| read[F, Int]("envvar4") |@| read[F, Double]("envvar5")) {
+        AnotherConfig
+      }
   }
 
   val mapReader: MapReader[SampleConfig \/ AnotherConfig] =
@@ -44,7 +40,7 @@ object CoproductExample extends App {
 
   assert(
     // A right of coproduct or a left of nonemptylist of errors.
-    mapReader(validConfigForSampleConfig) ==  \/-(-\/(SampleConfig("v1", "v2")))
+    mapReader(validConfigForSampleConfig) == Success(-\/(SampleConfig("v1", "v2")))
   )
 
   // Only variables for left config exists in Env (Ex: use connector2 in the absence of connector1)
@@ -57,8 +53,7 @@ object CoproductExample extends App {
     )
 
   assert(
-    // A right of coproduct or a left of nonemptylist of errors.
-    mapReader(validConfigForAnotherConfig) == \/-(\/-(AnotherConfig("v3", 1, 2.0)))
+    mapReader(validConfigForAnotherConfig) == Success(\/-(AnotherConfig("v3", 1, 2.0)))
   )
 
   val invalidConfig =
@@ -70,10 +65,11 @@ object CoproductExample extends App {
     )
 
   assert(
-    mapReader(invalidConfig) == -\/(
+    mapReader(invalidConfig) == Failure(
       NonEmptyList(
         ConfigError("envvar1", ConfigError.MissingValue),
-        ConfigError("envvar5", ConfigError.ParseError("notadouble", "double")
+        ConfigError(
+          "envvar5", ConfigError.ParseError("notadouble", "double")
         )
       )
     )
@@ -90,7 +86,7 @@ object CoproductExample extends App {
     )
 
   assert(
-    mapReader(invalidConfig) ==
-      \/-(-\/(SampleConfig("v1", "v2")))
+    mapReader(allConfigsExist) ==
+      Success(-\/(SampleConfig("v1", "v2")))
   )
 }
