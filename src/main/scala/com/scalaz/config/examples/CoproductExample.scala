@@ -14,15 +14,15 @@ object CoproductExample extends App {
 
   def sampleConfig[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
-      (read[F, String]("envvar1") |@|
-        read[F, String]("envvar2")) {
+      (read[F, String]("x1") |@|
+        read[F, String]("x2")) {
         SampleConfig
       }
   }
 
   def anotherConfig[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
     override def apply(implicit F: ConfigSyntax[F]): F[AnotherConfig] =
-      (read[F, String]("envvar3") |@| read[F, Int]("envvar4") |@| read[F, Double]("envvar5")) {
+      (read[F, String]("x3") |@| read[F, Int]("x4") |@| read[F, Double]("x5")) {
         AnotherConfig
       }
   }
@@ -33,9 +33,9 @@ object CoproductExample extends App {
   // Only variables for left config exists in Env (Ex: use connector1)
   val validConfigForSampleConfig =
     Map(
-      "envvar1" -> "v1",
-      "envvar2" -> "v2",
-      "envvar3" -> "v3"
+      "x1" -> "v1",
+      "x2" -> "v2",
+      "x3" -> "v3"
     )
 
   assert(
@@ -46,10 +46,10 @@ object CoproductExample extends App {
   // Only variables for left config exists in Env (Ex: use connector2 in the absence of connector1)
   val validConfigForAnotherConfig =
     Map(
-      "envvar2" -> "v2",
-      "envvar3" -> "v3",
-      "envvar4" -> "1",
-      "envvar5" -> "2.0"
+      "x2" -> "v2",
+      "x3" -> "v3",
+      "x4" -> "1",
+      "x5" -> "2.0"
     )
 
   assert(
@@ -58,18 +58,18 @@ object CoproductExample extends App {
 
   val invalidConfig =
     Map(
-      "envvar2" -> "v2",
-      "envvar3" -> "v3",
-      "envvar4" -> "1",
-      "envvar5" -> "notadouble"
+      "x2" -> "v2",
+      "x3" -> "v3",
+      "x4" -> "1",
+      "x5" -> "notadouble"
     )
 
   assert(
     mapReader(invalidConfig) == Failure(
       NonEmptyList(
-        ConfigError("envvar1", ConfigError.MissingValue),
+        ConfigError("x1", ConfigError.MissingValue),
         ConfigError(
-          "envvar5",
+          "x5",
           ConfigError.ParseError("notadouble", "double")
         )
       )
@@ -79,11 +79,11 @@ object CoproductExample extends App {
   // Pick the left config (priority)
   val allConfigsExist =
     Map(
-      "envvar1" -> "v1",
-      "envvar2" -> "v2",
-      "envvar3" -> "v3",
-      "envvar4" -> "1",
-      "envvar5" -> "2.0"
+      "x1" -> "v1",
+      "x2" -> "v2",
+      "x3" -> "v3",
+      "x4" -> "1",
+      "x5" -> "2.0"
     )
 
   assert(

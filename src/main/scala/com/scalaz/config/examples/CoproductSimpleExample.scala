@@ -14,8 +14,8 @@ object CoproductSimpleExample extends App {
 
   def config[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
-      (read[F, String]("envvar").or(read[F, Int]("envvar2")) |@|
-        read[F, String]("envvar3")) { SampleConfig }
+      (read[F, String]("x1").or(read[F, Int]("x2")) |@|
+        read[F, String]("x3")) { SampleConfig }
   }
 
   val mapReader: MapReader[SampleConfig] = Config.reader(config)
@@ -29,19 +29,19 @@ object CoproductSimpleExample extends App {
   assert(
     parsed == Failure(
       NonEmptyList(
-        ConfigError("envvar", ConfigError.MissingValue),
-        ConfigError("envvar2", MissingValue)
+        ConfigError("x1", ConfigError.MissingValue),
+        ConfigError("x2", MissingValue)
       )
     )
   )
 
   // If config exists in the env, and they are valid
-  val validConfig = Map("envvar" -> "right", "envvar2" -> "right2", "envvar3" -> "right3")
+  val validConfig = Map("x1" -> "right", "x2" -> "right2", "x3" -> "right3")
   assert(
     mapReader(validConfig) == Success(SampleConfig("right".left[Int], "right3"))
   )
 
-  val anotherConfig = Map("envvar2" -> "2", "envvar3" -> "right3")
+  val anotherConfig = Map("x2" -> "2", "x3" -> "right3")
   assert(
     mapReader(anotherConfig) ==
       Success(SampleConfig(2.right[String], "right3"))
