@@ -1,8 +1,9 @@
 package com.scalaz.config
+
 package examples
 
 import com.scalaz.config.Config.MapReader
-import scalaz.{-\/, Failure, NonEmptyList, Success, \/, \/-}
+import scalaz.{ -\/, Failure, NonEmptyList, Success, \/, \/- }
 import scalaz.syntax.monad._
 import MapReader._
 
@@ -19,7 +20,6 @@ object CoproductExample extends App {
       }
   }
 
-
   def anotherConfig[F[_]]: Config[F, AnotherConfig] = new Config[F, AnotherConfig] {
     override def apply(implicit F: ConfigSyntax[F]): F[AnotherConfig] =
       (read[F, String]("envvar3") |@| read[F, Int]("envvar4") |@| read[F, Double]("envvar5")) {
@@ -28,7 +28,7 @@ object CoproductExample extends App {
   }
 
   val mapReader: MapReader[SampleConfig \/ AnotherConfig] =
-    sampleConfig[MapReader].apply or anotherConfig[MapReader].apply
+    sampleConfig[MapReader].apply.or(anotherConfig[MapReader].apply)
 
   // Only variables for left config exists in Env (Ex: use connector1)
   val validConfigForSampleConfig =
@@ -69,7 +69,8 @@ object CoproductExample extends App {
       NonEmptyList(
         ConfigError("envvar1", ConfigError.MissingValue),
         ConfigError(
-          "envvar5", ConfigError.ParseError("notadouble", "double")
+          "envvar5",
+          ConfigError.ParseError("notadouble", "double")
         )
       )
     )

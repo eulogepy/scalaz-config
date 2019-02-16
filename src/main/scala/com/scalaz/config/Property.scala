@@ -1,7 +1,7 @@
 package com.scalaz.config
 
-import com.scalaz.config.ConfigError.{ErrorType, ParseError}
-import scalaz.{@@, InvariantFunctor, Tag, \/}
+import com.scalaz.config.ConfigError.{ ErrorType, ParseError }
+import scalaz.{ @@, InvariantFunctor, Tag, \/ }
 import scalaz.syntax.either._
 import scalaz.syntax.invariantFunctor._
 
@@ -10,13 +10,10 @@ trait Property[A] {
   def read(p: String): ErrorType \/ A
 }
 
-object Property extends  PropertyInstances {
+object Property extends PropertyInstances {
   def apply[A](implicit ev: Property[A]): Property[A] = ev
 
-  def instance[A](
-    f: A => String,
-    g: String => ErrorType \/ A,
-  ): Property[A] =
+  def instance[A](f: A => String, g: String => ErrorType \/ A): Property[A] =
     new Property[A] {
       override def show(a: A): String              = f(a)
       override def read(p: String): ErrorType \/ A = g(p)
@@ -29,7 +26,10 @@ object Property extends  PropertyInstances {
     instance(_.toString, a => \/.fromTryCatchNonFatal(a.toLong).leftMap(_ => ParseError(a, "long")))
 
   implicit val doubleProperty: Property[Double] =
-    instance(_.toString, a => \/.fromTryCatchNonFatal(a.toDouble).leftMap(_ => ParseError(a, "double")))
+    instance(
+      _.toString,
+      a => \/.fromTryCatchNonFatal(a.toDouble).leftMap(_ => ParseError(a, "double"))
+    )
 
   implicit val stringProperty: Property[String] =
     instance(_.toString, _.right)
@@ -41,9 +41,10 @@ object Property extends  PropertyInstances {
 trait PropertyInstances {
   implicit val invariantProperty: InvariantFunctor[Property] =
     new InvariantFunctor[Property] {
-      override def xmap[A, B](ma: Property[A], f: A => B, g: B => A): Property[B] = new Property[B] {
-        override def show(a: B): String = ma.show(g(a))
-        override def read(p: String): ErrorType \/ B = ma.read(p).map(f)
-      }
+      override def xmap[A, B](ma: Property[A], f: A => B, g: B => A): Property[B] =
+        new Property[B] {
+          override def show(a: B): String              = ma.show(g(a))
+          override def read(p: String): ErrorType \/ B = ma.read(p).map(f)
+        }
     }
 }

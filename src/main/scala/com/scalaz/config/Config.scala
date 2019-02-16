@@ -2,14 +2,14 @@ package com.scalaz.config
 
 import scalaz.syntax.either._
 import scalaz.syntax.validation._
-import scalaz.{Failure, Kleisli, NonEmptyList, Success, ValidationNel, \/}
+import scalaz.{ Failure, Kleisli, NonEmptyList, Success, ValidationNel, \/ }
 
 trait Config[F[_], A] {
   def apply(implicit F: ConfigSyntax[F]): F[A]
 }
 
 object Config {
-  type Env = Map[String, String]
+  type Env          = Map[String, String]
   type MapReader[A] = Kleisli[ValidationNel[ConfigError, ?], Env, A]
 
   object MapReader {
@@ -25,7 +25,9 @@ object Config {
 
         override def product[A, B](l: => MapReader[A], r: => MapReader[B]): MapReader[(A, B)] =
           l.mapK[NonEmptyList[ConfigError] \/ ?, A](_.disjunction)
-            .flatMap(ll => r.mapK[NonEmptyList[ConfigError] \/ ?, B](_.disjunction).map(rr => (ll, rr)))
+            .flatMap(
+              ll => r.mapK[NonEmptyList[ConfigError] \/ ?, B](_.disjunction).map(rr => (ll, rr))
+            )
             .mapK[ValidationNel[ConfigError, ?], (A, B)](_.validation)
 
         override def coproduct[A, B](l: => MapReader[A], r: => MapReader[B]): MapReader[A \/ B] =
@@ -43,14 +45,14 @@ object Config {
         override def ap[A, B](fa: => MapReader[A])(f: => MapReader[A => B]): MapReader[B] =
           Kleisli[ValidationNel[ConfigError, ?], Env, B] { env =>
             fa.mapK[ValidationNel[ConfigError, ?], B](
-              v1 => {
-                f.mapK[ValidationNel[ConfigError, ?], B](v2 => v1.ap(v2)).run(env)
-              }
-            ).run(env)
+                v1 => {
+                  f.mapK[ValidationNel[ConfigError, ?], B](v2 => v1.ap(v2)).run(env)
+                }
+              )
+              .run(env)
           }
 
-        override def bind[A, B](fa: MapReader[A])
-          (f: A => MapReader[B]): MapReader[B] =
+        override def bind[A, B](fa: MapReader[A])(f: A => MapReader[B]): MapReader[B] =
           fa.mapK[NonEmptyList[ConfigError] \/ ?, A](_.disjunction)
             .flatMap(a => f(a).mapK[NonEmptyList[ConfigError] \/ ?, B](_.disjunction))
             .mapK[ValidationNel[ConfigError, ?], B](_.validation)

@@ -1,6 +1,6 @@
 package com.scalaz.config
 
-import scalaz.{Monad, \/}
+import scalaz.{ Monad, \/ }
 
 trait Syntax[F[_]] {
   def product[A, B](l: => F[A], r: => F[B]): F[(A, B)]

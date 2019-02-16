@@ -1,4 +1,5 @@
 package com.scalaz.config
+
 package examples
 
 import com.scalaz.config.Config.MapReader
@@ -6,7 +7,7 @@ import com.scalaz.config.ConfigError.MissingValue
 import scalaz.effect.IO
 import scalaz.syntax.either._
 import scalaz.syntax.monad._
-import scalaz.{Failure, NonEmptyList, Success, \/}
+import scalaz.{ Failure, NonEmptyList, Success, \/ }
 
 object CoproductSimpleExample extends App {
   case class SampleConfig(s1: String \/ Int, s2: String)
@@ -14,7 +15,7 @@ object CoproductSimpleExample extends App {
   def config[F[_]]: Config[F, SampleConfig] = new Config[F, SampleConfig] {
     override def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
       (read[F, String]("envvar").or(read[F, Int]("envvar2")) |@|
-        read[F, String]("envvar3")){ SampleConfig }
+        read[F, String]("envvar3")) { SampleConfig }
   }
 
   val mapReader: MapReader[SampleConfig] = Config.reader(config)
@@ -37,12 +38,12 @@ object CoproductSimpleExample extends App {
   // If config exists in the env, and they are valid
   val validConfig = Map("envvar" -> "right", "envvar2" -> "right2", "envvar3" -> "right3")
   assert(
-    mapReader(validConfig) == Success(SampleConfig("right".left[Int],  "right3"))
+    mapReader(validConfig) == Success(SampleConfig("right".left[Int], "right3"))
   )
 
   val anotherConfig = Map("envvar2" -> "2", "envvar3" -> "right3")
   assert(
     mapReader(anotherConfig) ==
-      Success(SampleConfig(2.right[String],  "right3"))
+      Success(SampleConfig(2.right[String], "right3"))
   )
 }

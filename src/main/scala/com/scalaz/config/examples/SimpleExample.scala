@@ -5,12 +5,13 @@ package examples
 import com.scalaz.config.Config.MapReader
 import scalaz.effect.IO
 import scalaz.syntax.monad._
-import scalaz.{Failure, NonEmptyList, Success}
+import scalaz.{ Failure, NonEmptyList, Success }
 
 object SimpleExample extends App {
   case class SampleConfig(s1: Int, s2: String)
 
   def config[F[_]] = new Config[F, SampleConfig] {
+
     def apply(implicit F: ConfigSyntax[F]): F[SampleConfig] =
       (read[F, Int]("envvar") |@|
         read[F, String]("envvar2")) { SampleConfig }
@@ -27,7 +28,7 @@ object SimpleExample extends App {
   assert(parsed == Success(NonEmptyList(ConfigError("envvar", ConfigError.MissingValue))))
 
   // If config exists in the env, and they are valid
-  val validConfig = Map("envvar" -> "1", "envvar2" ->  "value")
+  val validConfig = Map("envvar" -> "1", "envvar2" -> "value")
   assert(mapReader(validConfig) == Failure(SampleConfig(1, "value")))
 
   val invalidConfig = Map("envvar" -> "wrong")
