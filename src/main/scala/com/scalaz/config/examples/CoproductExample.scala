@@ -3,9 +3,9 @@ package com.scalaz.config
 package examples
 
 import com.scalaz.config.Config.MapReader
-import scalaz.{ -\/, Failure, NonEmptyList, Success, \/, \/- }
+import com.scalaz.config.Config.MapReader._
+import scalaz.NonEmptyList
 import scalaz.syntax.monad._
-import MapReader._
 
 object CoproductExample extends App {
 
@@ -28,8 +28,8 @@ object CoproductExample extends App {
   }
 
   // or you can do Config.reader(firstConfig).or(Config.reader(secondConfig))
-  def finalReader[F[_]: ConfigSyntax]: F[SampleConfig \/ AnotherConfig] =
-    firstConfig[F].apply.or(secondConfig[F].apply)
+  def finalReader[F[_]: ConfigSyntax]: F[Either[SampleConfig, AnotherConfig]] =
+    firstConfig[F].apply | secondConfig[F].apply
 
   // Only variables for left config exists in Env (Ex: use connector1)
   val validConfigForSampleConfig =
@@ -41,8 +41,8 @@ object CoproductExample extends App {
 
   assert(
     // A right of coproduct or a left of nonemptylist of errors.
-    finalReader[MapReader].apply(validConfigForSampleConfig) == Success(
-      -\/(SampleConfig("v1", "v2"))
+    finalReader[MapReader].apply(validConfigForSampleConfig) == Right(
+      Left(SampleConfig("v1", "v2"))
     )
   )
 
@@ -56,8 +56,8 @@ object CoproductExample extends App {
     )
 
   assert(
-    finalReader[MapReader].apply(validConfigForAnotherConfig) == Success(
-      \/-(AnotherConfig("v3", 1, 2.0))
+    finalReader[MapReader].apply(validConfigForAnotherConfig) == Right(
+      Right(AnotherConfig("v3", 1, 2.0))
     )
   )
 
@@ -70,7 +70,7 @@ object CoproductExample extends App {
     )
 
   assert(
-    finalReader[MapReader].apply(invalidConfig) == Failure(
+    finalReader[MapReader].apply(invalidConfig) == Left(
       NonEmptyList(
         ConfigError("x1", ConfigError.MissingValue),
         ConfigError(
@@ -93,6 +93,6 @@ object CoproductExample extends App {
 
   assert(
     finalReader[MapReader].apply(allConfigsExist) ==
-      Success(-\/(SampleConfig("v1", "v2")))
+      Right(Left(SampleConfig("v1", "v2")))
   )
 }

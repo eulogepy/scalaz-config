@@ -1,8 +1,6 @@
 package com.scalaz.config
 
 package syntax
-
-import scalaz.\/
 import scalaz.syntax.monad._
 
 trait ConfigSyntaxSyntax {
@@ -10,7 +8,7 @@ trait ConfigSyntaxSyntax {
     final def ~ [B](f: A => F[B])(implicit F: ConfigSyntax[F]): F[(A, B)] =
       self.flatMap(a => F.product(self, f(a)))
 
-    final def or[B](that: F[B])(implicit F: ConfigSyntax[F]): F[A \/ B] =
+    final def | [B](that: F[B])(implicit F: ConfigSyntax[F]): F[Either[A, B]] =
       F.coproduct(self, that)
   }
 }
