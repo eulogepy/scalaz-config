@@ -1,11 +1,12 @@
 # scalaz-config
 
+[![Build Status](https://travis-ci.org/scalaz/scalaz-config.svg?branch=master)](https://travis-ci.org/scalaz/scalaz-config)
 [![Gitter](https://badges.gitter.im/scalaz/scalaz-config.svg)](https://gitter.im/scalaz/scalaz-config?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-A [scalaz-ZIO](https://github.com/scalaz/scalaz-zio) based  configuration parsing library
+A [scalaz-zio](https://github.com/scalaz/scalaz-zio) based  configuration parsing library
 
 Configuration parsing should be easy as it sounds - Hence;
- 
+
  * It has no other dependencies.
  * No macros / no reflection
  * Can accumulate maximum errors.
