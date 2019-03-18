@@ -1,7 +1,17 @@
 # scalaz-config
 
+[![Build Status](https://travis-ci.org/scalaz/scalaz-config.svg?branch=master)](https://travis-ci.org/scalaz/scalaz-config)
 [![Gitter](https://badges.gitter.im/scalaz/scalaz-config.svg)](https://gitter.im/scalaz/scalaz-config?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+A [scalaz-zio](https://github.com/scalaz/scalaz-zio) based  configuration parsing library
+
+Configuration parsing should be easy as it sounds - Hence;
+
+ * It has no other dependencies.
+ * No macros / no reflection
+ * Can accumulate maximum errors.
+ * Insanely simple to use
+ * Based on the principle of [effect rotation](http://degoes.net/articles/rotating-effects)(scalaz-zio), that will seamlessly integrate with the rest of your application!
 
 ### Goal
 
